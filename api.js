@@ -35,15 +35,17 @@ async function getContractABI(address) {
 }
 
 async function getVariableHistory({address, variable}) {
+  console.time('Whole history');
+  console.time('Contract retrieval');
   const contract = await (contractABICache.get(address));
+  console.timeEnd('Contract retrieval');
 
   console.log('From block: 0');
 
-  const startTime = new Date().getTime();
+  console.time('Trace filter request');
   const events = await promisify(web3.trace.filter, web3.trace)({"toAddress": [address]});
+  console.timeEnd('Trace filter request');
 
-
-  console.log('Fetched in : ' + (new Date().getTime() - startTime));
   console.log('Browsing through ' + events.length + ' transactions');
 
   var history = [];
@@ -59,6 +61,7 @@ async function getVariableHistory({address, variable}) {
     console.log('Fetched: ' + i++ + ' time: ' + time + ' val: ' + val);
   }
   history.sort((a, b) => a[0] - b[0]);
+  console.timeEnd('Whole history');
   return Promise.resolve(history);
 };
 
