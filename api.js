@@ -53,10 +53,14 @@ async function getVariableHistory({address, variable}) {
   var prevTime = 0;
   for (let event of events) {
     console.log(event)
+    console.time('Block time retrieval');
     const time = await blockTimeCache.get(event.blockNumber);
+    console.timeEnd('Block time retrieval');
     if (time === prevTime) continue;
     prevTime = time;
+    console.time('Contract querying');
     const val = await promisify(contract[variable], contract)(event.blockNumber);
+    console.timeEnd('Contract querying');
     history.push({time, val});
     console.log('Fetched: ' + i++ + ' time: ' + time + ' val: ' + val);
   }
