@@ -59,18 +59,11 @@ async function getVariableHistory({address, variable}) {
 
   var history = [];
   var i = 0;
-  await Promise.all(events.map(async event => {
-    const id = Math.random().toString().slice(2);
-    console.log('Requesting block time for block', event.blockNumber);
-    console.time('Block time retrieval ' + event.blockNumber + ' #' + id);
-    const time = await blockTimeCache.get(event.blockNumber);
-    console.timeEnd('Block time retrieval ' + event.blockNumber + ' #' + id);
-
-    console.time('Contract querying ' + event.blockNumber + ' #' + id);
-    const val = await promisify(contract[variable], contract)(event.blockNumber);
-    console.timeEnd('Contract querying ' + event.blockNumber + ' #' + id);
-
-    history.push({time, val});
+  await Promise.all(events.map(async ({blockNumber}) => {
+    console.log('Requesting data for block number #' + blockNumber)
+    const timePromise = blockTimeCache.get(blockNumber);
+    const valPromise = promisify(contract[variable], contract)(blockNumber);
+    history.push({time: await timePromise, value: await valPromise});
     console.log(`Fetched: ${i++} values`);
   }));
   history.sort((a, b) => a[0] - b[0]);
