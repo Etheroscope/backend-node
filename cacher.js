@@ -15,7 +15,7 @@ class Cacher {
         if (err.type !== 'NotFoundError') throw err;
         return this.fetchMethod(data)
           .then(result => {
-            // this.cache.put(key, JSON.stringify(result));
+            this.cache.put(key, JSON.stringify(result));
             return result;
           })
           .catch(err => { throw err; });
